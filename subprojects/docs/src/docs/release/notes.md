@@ -86,6 +86,7 @@ Gradle 5.0 will remove support for the following methods:
 
 - `TaskInputs.getHasInputs()`
 - `TaskInputs.getHasSourceFiles()`
+- `TaskInputs.getFiles()`
 - `TaskInputs.getSourceFiles()`
 - `TaskInputs.getProperties()`
 - `TaskOutputs.getHasOutput()`
