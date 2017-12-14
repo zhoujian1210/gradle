@@ -24,7 +24,6 @@
     <xsl:param name="use.id.as.filename">1</xsl:param>
 
     <xsl:param name="generate.toc">
-        book toc,title,example
         part toc,title
         chapter toc,title
     </xsl:param>
@@ -408,6 +407,48 @@
                 </div>
             </div>
         </footer>
+    </xsl:template>
+
+    <!-- BOOK TITLEPAGE -->
+    <xsl:template name="book.titlepage">
+        <main class="home">
+            <header>
+                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/title"/>
+            </header>
+
+            <img src="http://via.placeholder.com/350x350" class="right"/>
+            <p class="lead">Gradle is an open-source automation tool focused on flexibility and performance. Gradle build scripts are written using a <a href="http://groovy-lang.org/">Groovy</a> or <a href="https://kotlinlang.org/">Kotlin</a> DSL.</p>
+
+            <ul>
+                <li><strong>Highly Customizable</strong> — Gradle is modeled in a way that customizable and extensible in the most fundamental ways.</li>
+                <li><strong>Fast</strong> — Gradle completes tasks quickly by reusing outputs from it's build cache when it can and processing only files that changed when possible.</li>
+                <li><strong>Widely Used</strong> — Gradle is the official build tool for Android, and has been adopted by highly successful engineering organizations</li>
+            </ul>
+
+            <p>Something about dependency management</p>
+
+            <h2>Getting Started</h2>
+
+            <p>install, compare with/migrate from maven, https://gradle.org/guides/#getting-started</p>
+
+            <p>If you're creating a new project....</p>
+
+            <h2>Using Gradle Builds</h2>
+
+            <p>If you're using Gradle with an existing project...</p>
+
+            <ul>
+                <li><strong>Operating Systems</strong> — Windows, macOS, and major variants of Linux.</li>
+                <li><strong>Supported IDEs</strong> — Android Studio, Eclipse, IntelliJ IDEA, Netbeans, and others.</li>
+                <li><strong>Programming Languages</strong> — Built-in support for Java, C++, Groovy, Scala. Community support through plugins for JavaScript, Kotlin, Go, Python, and more.</li>
+            </ul>
+
+            <h2>Authoring Gradle Builds</h2>
+
+
+
+            <!--TODO: <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/legalnotice"/>-->
+        </main>
     </xsl:template>
 
 </xsl:stylesheet>

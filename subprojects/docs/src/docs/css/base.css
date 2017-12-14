@@ -371,6 +371,11 @@ p .right {
     margin-bottom: 1.25em;
 }
 
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
 .hide {
     display: none;
 }
