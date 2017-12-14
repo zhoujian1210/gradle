@@ -43,7 +43,10 @@ public interface TaskInputs extends CompatibilityAdapterForTaskInputs {
      * Returns the input files of this task.
      *
      * @return The input files. Returns an empty collection if this task has no input files.
+     *
+     * @deprecated Declare individual task properties to access input files.
      */
+    @Deprecated
     FileCollection getFiles();
 
     /**

@@ -25,10 +25,16 @@ class TaskInputFilePropertiesIntegrationTest extends AbstractIntegrationSpec {
     @Unroll
     def "allows optional @#annotation.simpleName to have null value"() {
         buildFile << """
+            import org.gradle.api.internal.tasks.properties.GetInputFilesVisitor
+            import org.gradle.api.internal.tasks.TaskPropertyUtils
+            import org.gradle.api.internal.tasks.properties.PropertyWalker
+
             class CustomTask extends DefaultTask {
                 @Optional @$annotation.simpleName input
                 @TaskAction void doSomething() {
-                    assert inputs.files.empty
+                    def visitor = new GetInputFilesVisitor(this.toString())
+                    TaskPropertyUtils.visitProperties(project.services.get(PropertyWalker), this, visitor)
+                    assert visitor.files.empty
                 }
             }
 
@@ -122,6 +128,7 @@ class TaskInputFilePropertiesIntegrationTest extends AbstractIntegrationSpec {
         "getHasInputs"      | "The TaskInputs.getHasInputs() method has been deprecated and is scheduled to be removed in Gradle 5.0. Declare individual task properties to access input files."
         "getHasSourceFiles" | "The TaskInputs.getHasSourceFiles() method has been deprecated and is scheduled to be removed in Gradle 5.0. Declare individual task properties to access source files."
         "getSourceFiles"    | "The TaskInputs.getSourceFiles() method has been deprecated and is scheduled to be removed in Gradle 5.0. Declare individual task properties to access source files."
+        "getFiles"          | "The TaskInputs.getFiles() method has been deprecated and is scheduled to be removed in Gradle 5.0. Declare individual task properties to access input files."
         "getProperties"     | "The TaskInputs.getProperties() method has been deprecated and is scheduled to be removed in Gradle 5.0. Use the property() and properties() methods to declare input properties instead."
     }
 

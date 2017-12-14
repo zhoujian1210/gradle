@@ -83,6 +83,7 @@ public class DefaultTaskInputs implements TaskInputsInternal {
 
     @Override
     public FileCollection getFiles() {
+        DeprecationLogger.nagUserOfDiscontinuedMethod("TaskInputs.getFiles()", "Declare individual task properties to access input files.");
         return allInputFiles;
     }
 
