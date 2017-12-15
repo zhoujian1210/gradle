@@ -1179,7 +1179,19 @@ public class DependencyGraphBuilder {
         }
 
         private ModuleVersionResolveException getFailure() {
-            return failure != null ? failure : selected.getFailure();
+            if (failure != null) {
+                return failure;
+            }
+            if (selected != null) {
+                return selected.getFailure();
+            }
+            if (idResolveResult != null) {
+                ModuleVersionResolveException failure = idResolveResult.getFailure();
+                LOGGER.warn("SelectorState.failure and SelectorState.selected are null: have idResolveResult.failure == " + failure, failure);
+                return failure;
+            }
+            LOGGER.warn("SelectorState.failure, SelectorState.selected and SelectorState.idResolveResult are all null");
+            return null;
         }
 
         public ComponentSelectionReason getSelectionReason() {
