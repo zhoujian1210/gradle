@@ -104,6 +104,7 @@ public class DefaultTaskProperties implements TaskProperties {
         this.inputFileProperties = inputFileProperties;
         this.outputFileProperties = outputFileProperties;
         this.hasDeclaredOutputs = hasDeclaredOutputs;
+        outputFileProperties.create();
 
         this.inputFiles = new CompositeFileCollection() {
             @Override
