@@ -253,13 +253,24 @@ public class DefaultGradleLauncher implements GradleLauncher {
             }
 
             modelConfigurationListener.onConfigure(gradle);
+
+            context.setResult(new ConfigureBuildBuildOperationType.Result(){
+                @Override
+                public String getBuildPath() {
+                    return gradle.getIdentityPath().getPath();
+                }
+            });
         }
 
         @Override
         public BuildOperationDescriptor.Builder description() {
             return BuildOperationDescriptor.displayName(contextualize("Configure build")).
-                parent(getGradle().getBuildOperation());
+                parent(getGradle().getBuildOperation()).details(new ConfigureBuildBuildOperationType.Details() {
+            });
         }
+    }
+
+    private static class ConfigureBuildOperationDetails implements ConfigureBuildBuildOperationType.Details {
     }
 
     private class CalculateTaskGraph implements RunnableBuildOperation {
