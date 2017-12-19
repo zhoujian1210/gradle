@@ -18,6 +18,7 @@ package org.gradle.api.internal.tasks;
 
 import com.google.common.base.Preconditions;
 import org.gradle.api.Buildable;
+import org.gradle.api.GradleException;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.TaskInternal;
@@ -57,6 +58,7 @@ public class CachingTaskDependencyResolveContext implements TaskDependencyResolv
 
     public CachingTaskDependencyResolveContext() {
         this(new TaskInfoFactory());
+        throw new GradleException("Pass in the taskinfofactory, please!");
     }
 
     public CachingTaskDependencyResolveContext(TaskInfoFactory taskInfoFactory) {
@@ -65,6 +67,11 @@ public class CachingTaskDependencyResolveContext implements TaskDependencyResolv
 
     public Set<? extends Task> getDependencies(Task task) {
         add(task.getTaskDependencies());
+        return resolve(task);
+    }
+
+    public Set<? extends Task> getDependencies(Task task, Object container) {
+        add(container);
         return resolve(task);
     }
 

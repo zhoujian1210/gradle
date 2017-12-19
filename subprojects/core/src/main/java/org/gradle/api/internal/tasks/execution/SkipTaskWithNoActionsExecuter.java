@@ -17,12 +17,14 @@ package org.gradle.api.internal.tasks.execution;
 
 import org.gradle.api.Task;
 import org.gradle.api.internal.TaskInternal;
+import org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext;
 import org.gradle.api.internal.tasks.TaskExecuter;
 import org.gradle.api.internal.tasks.TaskExecutionContext;
 import org.gradle.api.internal.tasks.TaskExecutionOutcome;
 import org.gradle.api.internal.tasks.TaskStateInternal;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.execution.taskgraph.TaskInfoFactory;
 
 /**
  * A {@link org.gradle.api.internal.tasks.TaskExecuter} which skips tasks that have no actions.
@@ -39,7 +41,9 @@ public class SkipTaskWithNoActionsExecuter implements TaskExecuter {
         if (task.getTaskActions().isEmpty()) {
             LOGGER.info("Skipping {} as it has no actions.", task);
             boolean upToDate = true;
-            for (Task dependency : task.getTaskDependencies().getDependencies(task)) {
+            CachingTaskDependencyResolveContext resolveContext = new CachingTaskDependencyResolveContext(new TaskInfoFactory());
+            resolveContext.add(task.getTaskDependencies());
+            for (Task dependency : resolveContext.resolve(task)) {
                 if (!dependency.getState().getSkipped()) {
                     upToDate = false;
                     break;
