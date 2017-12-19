@@ -1187,10 +1187,10 @@ public class DependencyGraphBuilder {
             }
             if (idResolveResult != null) {
                 ModuleVersionResolveException failure = idResolveResult.getFailure();
-                LOGGER.warn("SelectorState.failure and SelectorState.selected are null: have idResolveResult.failure == " + failure, failure);
+                LOGGER.warn(dependencyMetadata.getRequested() + ": SelectorState.failure and SelectorState.selected are null: have idResolveResult.failure == " + failure, failure);
                 return failure;
             }
-            LOGGER.warn("SelectorState.failure, SelectorState.selected and SelectorState.idResolveResult are all null");
+            LOGGER.warn(dependencyMetadata.getRequested() + ": SelectorState.failure, SelectorState.selected and SelectorState.idResolveResult are all null");
             return null;
         }
 
