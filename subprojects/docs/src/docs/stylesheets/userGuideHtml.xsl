@@ -416,37 +416,58 @@
                 <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/title"/>
             </header>
 
-            <img src="http://via.placeholder.com/350x350" class="right"/>
             <p class="lead">Gradle is an open-source automation tool focused on flexibility and performance. Gradle build scripts are written using a <a href="http://groovy-lang.org/">Groovy</a> or <a href="https://kotlinlang.org/">Kotlin</a> DSL.</p>
 
             <ul>
-                <li><strong>Highly Customizable</strong> — Gradle is modeled in a way that customizable and extensible in the most fundamental ways.</li>
-                <li><strong>Fast</strong> — Gradle completes tasks quickly by reusing outputs from it's build cache when it can and processing only files that changed when possible.</li>
-                <li><strong>Widely Used</strong> — Gradle is the official build tool for Android, and has been adopted by highly successful engineering organizations</li>
+                <li><strong>Highly customizable</strong> — Gradle is modeled in a way that customizable and extensible in the most fundamental ways, and can adapt to any project.</li>
+                <li><strong>Fast</strong> — Gradle completes tasks quickly by reusing outputs from it's <a href="/userguide/build_cache.html">build cache</a> when it can, and otherwise processing only files that changed.</li>
+                <li><strong>Extensible</strong> — Gradle plugins allow you to implement new capabilities or custom behavior.</li>
+                <li><strong>Free and open source</strong> — Gradle is an open source project, hosted <a href="https://github.com/gradle">on GitHub</a>, and licensed under the <a href="https://github.com/gradle/gradle/blob/master/LICENSE" title="Gradle software license">Apache License v2.0</a>.</li>
             </ul>
 
-            <p>Something about dependency management</p>
+            <p>Read about <a href="https://gradle.org/features/">Gradle features</a> to learn what is possible with Gradle.</p>
 
-            <h2>Getting Started</h2>
+            <h2>New projects with Gradle</h2>
 
-            <p>install, compare with/migrate from maven, https://gradle.org/guides/#getting-started</p>
+            <p>Getting started with Gradle is easy! First, follow our guide to <a href="/userguide/installation.html">download and install Gradle</a>, then check out Gradle <a href="https://gradle.org/guides/#getting-started">getting started guides</a> to create your first build.</p>
 
-            <p>If you're creating a new project....</p>
+            <p>If you're currently using Maven, see a visual <a href="https://gradle.org/maven-vs-gradle/">Gradle vs Maven comparison</a> and follow the guide for <a href="https://guides.gradle.org/migrating-from-maven/">migrating from Maven to Gradle</a>.</p>
 
-            <h2>Using Gradle Builds</h2>
+            <p>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+                <img src="http://via.placeholder.com/85x85" class="left"/>
+            </p>
 
-            <p>If you're using Gradle with an existing project...</p>
+            <h2>Using existing Gradle builds</h2>
+
+            <p>Gradle supports many major IDEs, including Android Studio, Eclipse, IntelliJ IDEA, Visual Studio 2017, and XCode.</p>
+
+            <p>You can also invoke Gradle via its <a href="/userguide/command_line_interface.html">command line interface</a>
+             in your terminal or through your continuous integration server.</p>
+
+            <p>Gradle <a href="https://gradle.com/build-scans">build scans</a> help you understand build results, improve build performance, and collaborate to fix problems faster.</p>
+
+            <p>
+            <img src="http://via.placeholder.com/190x180" class="left"/>
+            <img src="http://via.placeholder.com/190x180" class="left"/>
+            <img src="http://via.placeholder.com/190x180" class="left"/>
+            </p>
+
+            <h2>Getting help</h2>
+
+            <p>If you ever run into trouble, there are a number of ways to get help:</p>
 
             <ul>
-                <li><strong>Operating Systems</strong> — Windows, macOS, and major variants of Linux.</li>
-                <li><strong>Supported IDEs</strong> — Android Studio, Eclipse, IntelliJ IDEA, Netbeans, and others.</li>
-                <li><strong>Programming Languages</strong> — Built-in support for Java, C++, Groovy, Scala. Community support through plugins for JavaScript, Kotlin, Go, Python, and more.</li>
+                <li><strong><a href="https://discuss.gradle.org" title="Gradle help and discussion forums">Forum</a></strong> — Community members and core contributors answer your questions.</li>
+                <li><strong><a href="https://gradle.org/training/" title="Gradle training schedule">Training</a></strong> — Free, web-based Gradle training from Gradle developers happens every month.</li>
+                <li><strong><a href="https://gradle.org/services/">Enterprise Services</a></strong> — Private, on-site support and training can be purchased alongside a <a href="https://gradle.com/enterprise">Gradle Enterprise</a> subscription.</li>
             </ul>
 
-            <h2>Authoring Gradle Builds</h2>
-
-
-
+            <p>We hope you build happiness with Gradle!</p>
             <!--TODO: <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="bookinfo/legalnotice"/>-->
         </main>
     </xsl:template>
