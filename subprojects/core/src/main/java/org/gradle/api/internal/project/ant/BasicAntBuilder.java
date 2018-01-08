@@ -29,25 +29,27 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicAntBuilder extends org.gradle.api.AntBuilder implements Closeable {
-    private final Field nodeField;
-    private final List children;
+    // These are used to discard references to tasks so they can be garbage collected
+    private static final Field NODE_FIELD;
+    private static final Field COLLECTOR_FIELD;
+    private static final Field CHILDREN_FIELD;
 
-    public BasicAntBuilder() {
-        // These are used to discard references to tasks so they can be garbage collected
-        Field collectorField;
+    static {
         try {
-            nodeField = AntBuilder.class.getDeclaredField("lastCompletedNode");
-            nodeField.setAccessible(true);
-            collectorField = AntBuilder.class.getDeclaredField("collectorTarget");
-            collectorField.setAccessible(true);
-            Target target = (Target) collectorField.get(this);
-            Field childrenField = Target.class.getDeclaredField("children");
-            childrenField.setAccessible(true);
-            children = (List) childrenField.get(target);
+            NODE_FIELD = AntBuilder.class.getDeclaredField("lastCompletedNode");
+            NODE_FIELD.setAccessible(true);
+            COLLECTOR_FIELD = AntBuilder.class.getDeclaredField("collectorTarget");
+            COLLECTOR_FIELD.setAccessible(true);
+            CHILDREN_FIELD = Target.class.getDeclaredField("children");
+            CHILDREN_FIELD.setAccessible(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private List children;
+
+    public BasicAntBuilder() {
         getAntProject().addDataTypeDefinition("gradleFileResource", AntFileResource.class);
         getAntProject().addDataTypeDefinition("gradleBaseDirSelector", BaseDirSelector.class);
     }
@@ -93,7 +95,7 @@ public class BasicAntBuilder extends org.gradle.api.AntBuilder implements Closea
 
     protected Object postNodeCompletion(Object parent, Object node) {
         try {
-            return nodeField.get(this);
+            return NODE_FIELD.get(this);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -104,12 +106,24 @@ public class BasicAntBuilder extends org.gradle.api.AntBuilder implements Closea
         // Discard the node so it can be garbage collected. Some Ant tasks cache a potentially large amount of state
         // in fields.
         try {
-            nodeField.set(this, null);
-            children.clear();
+            NODE_FIELD.set(this, null);
+            getChildren().clear();
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         return value;
+    }
+
+    private List getChildren() {
+        if (children == null) {
+            try {
+                Target target = (Target) COLLECTOR_FIELD.get(this);
+                children = (List) CHILDREN_FIELD.get(target);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return children;
     }
 
     public void close() {
