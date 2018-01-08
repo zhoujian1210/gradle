@@ -16,8 +16,7 @@
 
 package org.gradle.internal.concurrent;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,11 +24,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultExecutorFactory implements ExecutorFactory, Stoppable {
-    private final Set<ManagedExecutor> executors = new CopyOnWriteArraySet<ManagedExecutor>();
+    private final ConcurrentHashMap<ManagedExecutor, Boolean> executors = new ConcurrentHashMap<ManagedExecutor, Boolean>();
 
     public void stop() {
         try {
-            CompositeStoppable.stoppable(executors).stop();
+            CompositeStoppable.stoppable(executors.keySet()).stop();
         } finally {
             executors.clear();
         }
@@ -37,7 +36,7 @@ public class DefaultExecutorFactory implements ExecutorFactory, Stoppable {
 
     public ManagedExecutor create(String displayName) {
         ManagedExecutor executor = new TrackedManagedExecutor(createExecutor(displayName), new ExecutorPolicy.CatchAndRecordFailures());
-        executors.add(executor);
+        executors.put(executor, Boolean.TRUE);
         return executor;
     }
 
@@ -47,7 +46,7 @@ public class DefaultExecutorFactory implements ExecutorFactory, Stoppable {
 
     public ManagedExecutor create(String displayName, int fixedSize) {
         TrackedManagedExecutor executor = new TrackedManagedExecutor(createExecutor(displayName, fixedSize), new ExecutorPolicy.CatchAndRecordFailures());
-        executors.add(executor);
+        executors.put(executor, Boolean.TRUE);
         return executor;
     }
 
@@ -58,7 +57,7 @@ public class DefaultExecutorFactory implements ExecutorFactory, Stoppable {
     @Override
     public ManagedScheduledExecutor createScheduled(String displayName, int fixedSize) {
         ManagedScheduledExecutor executor = new TrackedScheduledManagedExecutor(createScheduledExecutor(displayName, fixedSize), new ExecutorPolicy.CatchAndRecordFailures());
-        executors.add(executor);
+        executors.put(executor, Boolean.TRUE);
         return executor;
     }
 

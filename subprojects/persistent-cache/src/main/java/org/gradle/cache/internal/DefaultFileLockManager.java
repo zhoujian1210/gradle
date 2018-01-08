@@ -15,6 +15,7 @@
  */
 package org.gradle.cache.internal;
 
+import com.google.common.collect.Sets;
 import org.gradle.cache.FileIntegrityViolationException;
 import org.gradle.cache.FileLock;
 import org.gradle.cache.FileLockManager;
@@ -45,7 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.gradle.internal.UncheckedException.throwAsUncheckedException;
 
@@ -56,7 +57,7 @@ public class DefaultFileLockManager implements FileLockManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileLockManager.class);
     public static final int DEFAULT_LOCK_TIMEOUT = 60000;
 
-    private final Set<File> lockedFiles = new CopyOnWriteArraySet<File>();
+    private final Set<File> lockedFiles = Sets.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
     private final ProcessMetaDataProvider metaDataProvider;
     private final int lockTimeoutMs;
     private final IdGenerator<Long> generator;
