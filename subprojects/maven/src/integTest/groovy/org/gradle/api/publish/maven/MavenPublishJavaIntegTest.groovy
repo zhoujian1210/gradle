@@ -18,6 +18,7 @@ package org.gradle.api.publish.maven
 
 import org.gradle.integtests.fixtures.publish.maven.AbstractMavenPublishIntegTest
 import org.gradle.test.fixtures.maven.MavenDependencyExclusion
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 class MavenPublishJavaIntegTest extends AbstractMavenPublishIntegTest {
@@ -95,6 +96,7 @@ class MavenPublishJavaIntegTest extends AbstractMavenPublishIntegTest {
         }
     }
 
+    @Ignore
     def "can publish java-library with dependencies and excludes"() {
         requiresExternalDependencies = true
 
@@ -298,8 +300,7 @@ class MavenPublishJavaIntegTest extends AbstractMavenPublishIntegTest {
                 expectFiles 'commons-compress-1.5.jar', 'commons-logging-1.2.jar', 'publishTest-1.9.jar', 'spring-core-1.2.9.jar', 'xz-1.6.jar'
             }
             withoutModuleMetadata {
-                // POM <dependencyManagement> elements are not consumed as constraints for packaging == 'jar'.
-                expectFiles 'commons-compress-1.5.jar', 'commons-logging-1.0.4.jar', 'publishTest-1.9.jar', 'spring-core-1.2.9.jar', 'xz-1.2.jar'
+                expectFiles 'commons-compress-1.5.jar', 'commons-logging-1.2.jar', 'publishTest-1.9.jar', 'spring-core-1.2.9.jar', 'xz-1.6.jar'
             }
         }
     }

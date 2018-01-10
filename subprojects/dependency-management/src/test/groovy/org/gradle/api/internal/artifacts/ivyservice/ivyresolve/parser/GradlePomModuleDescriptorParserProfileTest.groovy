@@ -18,10 +18,12 @@ package org.gradle.api.internal.artifacts.ivyservice.ivyresolve.parser
 
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.internal.component.external.descriptor.MavenScope
+import spock.lang.Ignore
 import spock.lang.Issue
 
 import static org.gradle.api.internal.component.ArtifactType.MAVEN_POM
 
+@Ignore
 class GradlePomModuleDescriptorParserProfileTest extends AbstractGradlePomModuleDescriptorParserTest {
 
     def "pom with project coordinates defined by active profile properties"() {

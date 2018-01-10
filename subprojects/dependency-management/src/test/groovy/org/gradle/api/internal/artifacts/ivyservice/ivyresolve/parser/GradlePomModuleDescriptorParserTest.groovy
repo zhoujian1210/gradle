@@ -22,11 +22,13 @@ import org.gradle.internal.component.external.model.MavenDependencyDescriptor
 import org.gradle.internal.component.external.model.MutableMavenModuleResolveMetadata
 import org.gradle.internal.component.model.DefaultIvyArtifactName
 import org.gradle.internal.hash.HashUtil
+import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Unroll
 
 import static org.gradle.api.internal.component.ArtifactType.MAVEN_POM
 
+@Ignore
 class GradlePomModuleDescriptorParserTest extends AbstractGradlePomModuleDescriptorParserTest {
     def "parses simple pom"() {
         given:

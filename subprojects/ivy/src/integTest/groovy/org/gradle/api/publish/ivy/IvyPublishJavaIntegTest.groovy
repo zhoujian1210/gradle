@@ -17,6 +17,7 @@
 
 package org.gradle.api.publish.ivy
 
+import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Unroll
 
@@ -265,6 +266,7 @@ class IvyPublishJavaIntegTest extends AbstractIvyPublishIntegTest {
     }
 
     @Issue("GRADLE-3514")
+    @Ignore
     void "generated ivy descriptor includes dependency exclusions"() {
         requiresExternalDependencies = true
 

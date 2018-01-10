@@ -16,9 +16,11 @@
 package org.gradle.api.internal.artifacts.ivyservice.ivyresolve.parser
 
 import org.gradle.internal.component.external.descriptor.MavenScope
+import org.junit.Ignore
 
 import static org.gradle.api.internal.component.ArtifactType.MAVEN_POM
 
+@Ignore
 class GradlePomModuleDescriptorParserBomTest extends AbstractGradlePomModuleDescriptorParserTest {
 
     def "a pom file with packaging=pom is a bom - dependencies declared in dependencyManagement block are treated as optional dependencies"() {

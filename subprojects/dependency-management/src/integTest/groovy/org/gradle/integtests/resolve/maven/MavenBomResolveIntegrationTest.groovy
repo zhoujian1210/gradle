@@ -20,6 +20,7 @@ import org.gradle.integtests.fixtures.AbstractHttpDependencyResolutionTest
 import org.gradle.integtests.fixtures.FeaturePreviewsFixture
 import org.gradle.integtests.fixtures.resolve.ResolveTestFixture
 import org.gradle.test.fixtures.maven.MavenModule
+import spock.lang.Ignore
 
 class MavenBomResolveIntegrationTest extends AbstractHttpDependencyResolutionTest {
     def resolve = new ResolveTestFixture(buildFile).expectDefaultConfiguration('runtime')
@@ -199,6 +200,7 @@ class MavenBomResolveIntegrationTest extends AbstractHttpDependencyResolutionTes
 
     }
 
+    @Ignore
     def "a parent pom is not a bom"() {
         mavenHttpRepo.module('group', 'main', '5.0').allowAll().parent(bom.group, bom.artifactId, bom.version).publish()
 
@@ -216,6 +218,7 @@ class MavenBomResolveIntegrationTest extends AbstractHttpDependencyResolutionTes
         failure.assertHasCause "Could not find group:moduleA:."
     }
 
+    @Ignore
     def "a parent pom with dependency entries without versions does not fail the build"() {
         given:
         mavenHttpRepo.module('group', 'main', '5.0').allowAll().parent(bom.group, bom.artifactId, bom.version).publish()
