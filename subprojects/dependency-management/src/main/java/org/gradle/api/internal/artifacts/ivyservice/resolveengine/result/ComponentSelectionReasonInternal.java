@@ -15,8 +15,12 @@
  */
 package org.gradle.api.internal.artifacts.ivyservice.resolveengine.result;
 
+import org.gradle.api.artifacts.result.ComponentSelectionCause;
+import org.gradle.api.artifacts.result.ComponentSelectionDescription;
 import org.gradle.api.artifacts.result.ComponentSelectionReason;
 
 public interface ComponentSelectionReasonInternal extends ComponentSelectionReason {
-    ComponentSelectionReasonInternal withReason(String description);
+    ComponentSelectionReasonInternal setCause(ComponentSelectionDescription description);
+    ComponentSelectionReasonInternal addCause(ComponentSelectionDescription description);
+    ComponentSelectionReasonInternal addCause(ComponentSelectionCause cause, String description);
 }

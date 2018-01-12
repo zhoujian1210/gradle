@@ -20,13 +20,12 @@ import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.VersionConstraint;
 import org.gradle.api.artifacts.component.ModuleComponentSelector;
-import org.gradle.api.artifacts.result.ComponentSelectionReason;
+import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.ComponentSelectionDescriptionInternal;
 import org.gradle.api.internal.artifacts.DefaultModuleVersionSelector;
 import org.gradle.api.internal.artifacts.DependencyResolveDetailsInternal;
 import org.gradle.api.internal.artifacts.DependencySubstitutionInternal;
 import org.gradle.api.internal.artifacts.dependencies.DefaultMutableVersionConstraint;
 import org.gradle.api.internal.artifacts.dsl.ModuleVersionSelectorParsers;
-import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.ComponentSelectionReasonInternal;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.VersionSelectionReasons;
 import org.gradle.internal.component.external.model.DefaultModuleComponentSelector;
 
@@ -44,8 +43,8 @@ public class DefaultDependencyResolveDetails implements DependencyResolveDetails
         this.requested = requested;
     }
 
-    private ComponentSelectionReasonInternal selectionReason() {
-        ComponentSelectionReasonInternal reason = VersionSelectionReasons.SELECTED_BY_RULE;
+    private ComponentSelectionDescriptionInternal selectionReason() {
+        ComponentSelectionDescriptionInternal reason = VersionSelectionReasons.SELECTED_BY_RULE;
         if (customDescription != null) {
             reason = reason.withReason(customDescription);
         }
@@ -66,7 +65,7 @@ public class DefaultDependencyResolveDetails implements DependencyResolveDetails
     }
 
     @Override
-    public void useVersion(VersionConstraint version, ComponentSelectionReason selectionReason) {
+    public void useVersion(VersionConstraint version, ComponentSelectionDescriptionInternal selectionReason) {
         assert selectionReason != null;
         if (version == null) {
             throw new IllegalArgumentException("Configuring the dependency resolve details with 'null' version is not allowed.");
@@ -104,8 +103,8 @@ public class DefaultDependencyResolveDetails implements DependencyResolveDetails
     }
 
     @Override
-    public ComponentSelectionReason getSelectionReason() {
-        return delegate.getSelectionReason();
+    public ComponentSelectionDescriptionInternal getSelectionDescription() {
+        return delegate.getSelectionDescription();
     }
 
     @Override

@@ -18,14 +18,18 @@ package org.gradle.api.internal.artifacts.ivyservice.dependencysubstitution;
 
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.artifacts.component.ComponentSelector;
-import org.gradle.api.artifacts.result.ComponentSelectionReason;
+import org.gradle.api.artifacts.result.ComponentSelectionDescription;
+import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.ComponentSelectionDescriptionInternal;
+import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.DefaultComponentSelectionDescription;
 import org.gradle.api.internal.artifacts.DependencySubstitutionInternal;
 import org.gradle.api.internal.artifacts.dsl.ComponentSelectorParsers;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.VersionSelectionReasons;
 
+import static org.gradle.api.artifacts.result.ComponentSelectionCause.SELECTED_BY_RULE;
+
 public class DefaultDependencySubstitution implements DependencySubstitutionInternal {
     private final ComponentSelector requested;
-    private ComponentSelectionReason selectionReason;
+    private ComponentSelectionDescriptionInternal selectionDescription;
     private ComponentSelector target;
 
     public DefaultDependencySubstitution(ComponentSelector requested) {
@@ -45,19 +49,19 @@ public class DefaultDependencySubstitution implements DependencySubstitutionInte
 
     @Override
     public void useTarget(Object notation, String reason) {
-        useTarget(notation, VersionSelectionReasons.SELECTED_BY_RULE.withReason(reason));
+        useTarget(notation, new DefaultComponentSelectionDescription(SELECTED_BY_RULE, reason));
     }
 
     @Override
-    public void useTarget(Object notation, ComponentSelectionReason selectionReason) {
+    public void useTarget(Object notation, ComponentSelectionDescription selectionDescription) {
         this.target = ComponentSelectorParsers.parser().parseNotation(notation);
-        this.selectionReason = selectionReason;
+        this.selectionDescription = (ComponentSelectionDescriptionInternal) selectionDescription;
         validateTarget(target);
     }
 
     @Override
-    public ComponentSelectionReason getSelectionReason() {
-        return selectionReason;
+    public ComponentSelectionDescriptionInternal getSelectionDescription() {
+        return selectionDescription;
     }
 
     @Override
@@ -67,7 +71,7 @@ public class DefaultDependencySubstitution implements DependencySubstitutionInte
 
     @Override
     public boolean isUpdated() {
-        return selectionReason != null;
+        return selectionDescription != null;
     }
 
     public static void validateTarget(ComponentSelector componentSelector) {
