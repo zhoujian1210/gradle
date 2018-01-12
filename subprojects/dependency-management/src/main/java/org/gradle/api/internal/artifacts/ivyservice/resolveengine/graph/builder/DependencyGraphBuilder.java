@@ -266,7 +266,11 @@ public class DependencyGraphBuilder {
                 }
             }
         }
-        if (dependenciesToBeResolvedInParallel.size() == 1) {
+        boolean disableParallel = Boolean.getBoolean("org.gradle.debug.dm.disable.parallel.edges");
+        if (disableParallel) {
+            LOGGER.debug("Disabled concurrent edge resolution");
+        }
+        if (dependenciesToBeResolvedInParallel.size() == 1 || disableParallel) {
             // don't bother doing anything in parallel if there's a single edge
             dependenciesToBeResolvedInParallel.clear();
         }
