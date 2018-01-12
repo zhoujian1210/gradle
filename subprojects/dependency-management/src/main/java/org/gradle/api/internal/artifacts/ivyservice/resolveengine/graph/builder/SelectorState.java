@@ -34,7 +34,7 @@ import org.gradle.internal.resolve.result.DefaultBuildableComponentIdResolveResu
  */
 class SelectorState implements DependencyGraphSelector {
     private final static Logger LOGGER = Logging.getLogger(SelectorState.class);
-    
+
     private final Long id;
     private final DependencyMetadata dependencyMetadata;
     private final DependencyToComponentIdResolver resolver;

@@ -22,6 +22,8 @@ import com.google.common.collect.Sets;
 import org.gradle.api.artifacts.ModuleIdentifier;
 import org.gradle.api.internal.artifacts.ImmutableModuleIdentifierFactory;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.graph.builder.DependencyGraphBuilder;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.internal.component.model.Exclude;
 import org.gradle.internal.component.model.IvyArtifactName;
 
@@ -32,6 +34,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.gradle.api.internal.artifacts.ivyservice.resolveengine.excludes.AbstractModuleExclusion.isWildcard;
 
@@ -51,8 +57,12 @@ import static org.gradle.api.internal.artifacts.ivyservice.resolveengine.exclude
  * is depended on via multiple paths in the graph, then the resulting exclusion is the _union_ of the exclusions on each of those paths (module is excluded if excluded by _all_).</li> </ul>
  */
 public class ModuleExclusions {
+    private final static Logger LOGGER = Logging.getLogger(ModuleExclusions.class);
+
     private static final ExcludeNone EXCLUDE_NONE = new ExcludeNone();
     private static final ExcludeAllModulesSpec EXCLUDE_ALL_MODULES_SPEC = new ExcludeAllModulesSpec();
+
+    private final Lock lock;
 
     private final ImmutableModuleIdentifierFactory moduleIdentifierFactory;
 
@@ -65,38 +75,86 @@ public class ModuleExclusions {
 
     public ModuleExclusions(ImmutableModuleIdentifierFactory moduleIdentifierFactory) {
         this.moduleIdentifierFactory = moduleIdentifierFactory;
+        boolean synchronizeAllAccess = Boolean.getBoolean("org.gradle.debug.dm.sync.exclusions");
+        if (synchronizeAllAccess) {
+            LOGGER.debug("Synchronizing all access to module exclusions cache");
+            lock = new ReentrantLock();
+        } else {
+            // no-op lock
+            lock = new Lock() {
+                @Override
+                public void lock() {
+
+                }
+
+                @Override
+                public void lockInterruptibly() throws InterruptedException {
+
+                }
+
+                @Override
+                public boolean tryLock() {
+                    return false;
+                }
+
+                @Override
+                public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+                    return false;
+                }
+
+                @Override
+                public void unlock() {
+
+                }
+
+                @Override
+                public Condition newCondition() {
+                    return null;
+                }
+            };
+        }
     }
 
     public ModuleExclusion excludeAny(List<Exclude> excludes, Set<String> hierarchy) {
-        Map<Set<String>, ModuleExclusion> exclusionMap = cachedExcludes.get(excludes);
-        if (exclusionMap == null) {
-            exclusionMap = Maps.newConcurrentMap();
-            cachedExcludes.put(excludes, exclusionMap);
-        }
-        ModuleExclusion moduleExclusion = exclusionMap.get(hierarchy);
-        if (moduleExclusion == null) {
-            List<Exclude> filtered = Lists.newArrayList();
-            for (Exclude exclude : excludes) {
-                for (String config : exclude.getConfigurations()) {
-                    if (hierarchy.contains(config)) {
-                        filtered.add(exclude);
-                        break;
+        try {
+            lock.lock();
+            Map<Set<String>, ModuleExclusion> exclusionMap = cachedExcludes.get(excludes);
+            if (exclusionMap == null) {
+                exclusionMap = Maps.newConcurrentMap();
+                cachedExcludes.put(excludes, exclusionMap);
+            }
+            ModuleExclusion moduleExclusion = exclusionMap.get(hierarchy);
+            if (moduleExclusion == null) {
+                List<Exclude> filtered = Lists.newArrayList();
+                for (Exclude exclude : excludes) {
+                    for (String config : exclude.getConfigurations()) {
+                        if (hierarchy.contains(config)) {
+                            filtered.add(exclude);
+                            break;
+                        }
                     }
                 }
+                moduleExclusion = excludeAny(filtered);
+                exclusionMap.put(hierarchy, moduleExclusion);
             }
-            moduleExclusion = excludeAny(filtered);
-            exclusionMap.put(hierarchy, moduleExclusion);
+            return moduleExclusion;
+        } finally {
+            lock.unlock();
         }
-        return moduleExclusion;
     }
 
     private ImmutableModuleExclusionSet asImmutable(Set<AbstractModuleExclusion> excludes) {
-        ImmutableModuleExclusionSet cached = exclusionSetCache.get(excludes);
-        if (cached == null) {
-            cached = new ImmutableModuleExclusionSet(excludes);
-            exclusionSetCache.put(excludes, cached);
+        try {
+            lock.lock();
+            ImmutableModuleExclusionSet cached = exclusionSetCache.get(excludes);
+            if (cached == null) {
+                cached = new ImmutableModuleExclusionSet(excludes);
+                exclusionSetCache.put(excludes, cached);
+            }
+            return cached;
+        } finally {
+            lock.unlock();
         }
-        return cached;
     }
 
     /**
@@ -120,20 +178,25 @@ public class ModuleExclusions {
      * Returns a spec that excludes those modules and artifacts that are excluded by _any_ of the given exclude rules.
      */
     public ModuleExclusion excludeAny(List<Exclude> excludes) {
-        if (excludes.isEmpty()) {
-            return EXCLUDE_NONE;
-        }
-        AbstractModuleExclusion exclusion = excludeAnyCache.get(excludes);
-        if (exclusion != null) {
+        try {
+            lock.lock();
+            if (excludes.isEmpty()) {
+                return EXCLUDE_NONE;
+            }
+            AbstractModuleExclusion exclusion = excludeAnyCache.get(excludes);
+            if (exclusion != null) {
+                return exclusion;
+            }
+            Set<AbstractModuleExclusion> exclusions = Sets.newHashSetWithExpectedSize(excludes.size());
+            for (Exclude exclude : excludes) {
+                exclusions.add(forExclude(exclude));
+            }
+            exclusion = new IntersectionExclusion(asImmutable(exclusions));
+            excludeAnyCache.put(excludes, exclusion);
             return exclusion;
+        } finally {
+            lock.unlock();
         }
-        Set<AbstractModuleExclusion> exclusions = Sets.newHashSetWithExpectedSize(excludes.size());
-        for (Exclude exclude : excludes) {
-            exclusions.add(forExclude(exclude));
-        }
-        exclusion = new IntersectionExclusion(asImmutable(exclusions));
-        excludeAnyCache.put(excludes, exclusion);
-        return exclusion;
     }
 
     private static AbstractModuleExclusion forExclude(Exclude rule) {
@@ -212,7 +275,7 @@ public class ModuleExclusions {
         List<AbstractModuleExclusion> specs = new ArrayList<AbstractModuleExclusion>();
         ((AbstractModuleExclusion) one).unpackUnion(specs);
         ((AbstractModuleExclusion) two).unpackUnion(specs);
-        for (int i = 0; i < specs.size();) {
+        for (int i = 0; i < specs.size(); ) {
             AbstractModuleExclusion spec = specs.get(i);
             AbstractModuleExclusion merged = null;
             // See if we can merge any of the following specs into one
@@ -251,24 +314,29 @@ public class ModuleExclusions {
     }
 
     private AbstractModuleExclusion maybeMergeIntoUnion(IntersectionExclusion one, IntersectionExclusion other) {
-        if (one.equals(other)) {
-            return one;
-        }
-        if (one.canMerge() && other.canMerge()) {
-            AbstractModuleExclusion[] oneFilters = one.getFilters().elements;
-            AbstractModuleExclusion[] otherFilters = other.getFilters().elements;
-            if (Arrays.equals(oneFilters, otherFilters)) {
+        try {
+            lock.lock();
+            if (one.equals(other)) {
                 return one;
             }
+            if (one.canMerge() && other.canMerge()) {
+                AbstractModuleExclusion[] oneFilters = one.getFilters().elements;
+                AbstractModuleExclusion[] otherFilters = other.getFilters().elements;
+                if (Arrays.equals(oneFilters, otherFilters)) {
+                    return one;
+                }
 
-            MergeOperation merge = mergeOperation(oneFilters, otherFilters);
-            AbstractModuleExclusion exclusion = mergeCache.get(merge);
-            if (exclusion != null) {
-                return exclusion;
+                MergeOperation merge = mergeOperation(oneFilters, otherFilters);
+                AbstractModuleExclusion exclusion = mergeCache.get(merge);
+                if (exclusion != null) {
+                    return exclusion;
+                }
+                return mergeAndCacheResult(merge, oneFilters, otherFilters);
             }
-            return mergeAndCacheResult(merge, oneFilters, otherFilters);
+            return null;
+        } finally {
+            lock.unlock();
         }
-        return null;
     }
 
     private MergeOperation mergeOperation(AbstractModuleExclusion[] one, AbstractModuleExclusion[] two) {
@@ -290,27 +358,32 @@ public class ModuleExclusions {
     }
 
     private AbstractModuleExclusion mergeAndCacheResult(MergeOperation merge, AbstractModuleExclusion[] oneFilters, AbstractModuleExclusion[] otherFilters) {
-        AbstractModuleExclusion exclusion; // Merge the exclude rules from both specs into a single union spec.
-        final BitSet remaining = new BitSet(otherFilters.length);
-        remaining.set(0, otherFilters.length, true);
-        MergeSet merged = new MergeSet(remaining, oneFilters.length + otherFilters.length);
-        for (AbstractModuleExclusion thisSpec : oneFilters) {
-            if (!remaining.isEmpty()) {
-                for (int i = remaining.nextSetBit(0); i >= 0; i = remaining.nextSetBit(i+1)) {
-                    AbstractModuleExclusion otherSpec = otherFilters[i];
-                    merged.current = otherSpec;
-                    merged.idx = i;
-                    mergeExcludeRules(thisSpec, otherSpec, merged);
+        try {
+            lock.lock();
+            AbstractModuleExclusion exclusion; // Merge the exclude rules from both specs into a single union spec.
+            final BitSet remaining = new BitSet(otherFilters.length);
+            remaining.set(0, otherFilters.length, true);
+            MergeSet merged = new MergeSet(remaining, oneFilters.length + otherFilters.length);
+            for (AbstractModuleExclusion thisSpec : oneFilters) {
+                if (!remaining.isEmpty()) {
+                    for (int i = remaining.nextSetBit(0); i >= 0; i = remaining.nextSetBit(i + 1)) {
+                        AbstractModuleExclusion otherSpec = otherFilters[i];
+                        merged.current = otherSpec;
+                        merged.idx = i;
+                        mergeExcludeRules(thisSpec, otherSpec, merged);
+                    }
                 }
             }
+            if (merged.isEmpty()) {
+                exclusion = ModuleExclusions.EXCLUDE_NONE;
+            } else {
+                exclusion = new IntersectionExclusion(asImmutable(merged));
+            }
+            mergeCache.put(merge, exclusion);
+            return exclusion;
+        } finally {
+            lock.unlock();
         }
-        if (merged.isEmpty()) {
-            exclusion = ModuleExclusions.EXCLUDE_NONE;
-        } else {
-            exclusion = new IntersectionExclusion(asImmutable(merged));
-        }
-        mergeCache.put(merge, exclusion);
-        return exclusion;
     }
 
     // Add exclusions to the list that will exclude modules/artifacts that are excluded by _both_ of the candidate rules.
