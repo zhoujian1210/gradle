@@ -52,10 +52,6 @@ class NodeState implements DependencyGraphNode {
     private final ResolveState resolveState;
     private ModuleExclusion previousTraversalExclusions;
 
-    NodeState(Long resultId, ResolvedConfigurationIdentifier id, ComponentState component, ResolveState resolveState) {
-        this(resultId, id, component, resolveState, component.getMetadata().getConfiguration(id.getConfiguration()));
-    }
-
     NodeState(Long resultId, ResolvedConfigurationIdentifier id, ComponentState component, ResolveState resolveState, ConfigurationMetadata md) {
         this.resultId = resultId;
         this.id = id;
