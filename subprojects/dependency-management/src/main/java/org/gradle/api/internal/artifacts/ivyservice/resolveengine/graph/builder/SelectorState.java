@@ -20,6 +20,8 @@ import org.gradle.api.artifacts.component.ComponentSelector;
 import org.gradle.api.artifacts.result.ComponentSelectionReason;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.graph.DependencyGraphSelector;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.internal.component.model.DependencyMetadata;
 import org.gradle.internal.resolve.ModuleVersionResolveException;
 import org.gradle.internal.resolve.resolver.DependencyToComponentIdResolver;
@@ -31,6 +33,8 @@ import org.gradle.internal.resolve.result.DefaultBuildableComponentIdResolveResu
  * Resolution state for a given module version selector.
  */
 class SelectorState implements DependencyGraphSelector {
+    private final static Logger LOGGER = Logging.getLogger(SelectorState.class);
+    
     private final Long id;
     private final DependencyMetadata dependencyMetadata;
     private final DependencyToComponentIdResolver resolver;
@@ -65,7 +69,19 @@ class SelectorState implements DependencyGraphSelector {
     }
 
     ModuleVersionResolveException getFailure() {
-        return failure != null ? failure : selected.getFailure();
+        if (failure != null) {
+            return failure;
+        }
+        if (selected != null) {
+            return selected.getFailure();
+        }
+        if (idResolveResult != null) {
+            ModuleVersionResolveException failure = idResolveResult.getFailure();
+            LOGGER.warn("SelectorState.failure and SelectorState.selected are null: have idResolveResult.failure == " + failure, failure);
+            return failure;
+        }
+        LOGGER.warn("SelectorState.failure, SelectorState.selected and SelectorState.idResolveResult are all null");
+        return null;
     }
 
     public ComponentSelectionReason getSelectionReason() {
