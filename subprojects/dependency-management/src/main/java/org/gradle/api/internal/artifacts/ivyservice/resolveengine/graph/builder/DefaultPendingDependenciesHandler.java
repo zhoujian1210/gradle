@@ -20,6 +20,7 @@ import org.gradle.api.artifacts.ModuleIdentifier;
 import org.gradle.api.internal.artifacts.ComponentSelectorConverter;
 import org.gradle.api.internal.artifacts.DependencySubstitutionInternal;
 import org.gradle.api.internal.artifacts.ivyservice.dependencysubstitution.DependencySubstitutionApplicator;
+import org.gradle.internal.resolve.ModuleVersionResolveException;
 
 import java.util.List;
 
@@ -47,10 +48,10 @@ public class DefaultPendingDependenciesHandler implements PendingDependenciesHan
     @Override
     public DependencyState maybeSubstitute(DependencyState dependencyState) {
         DependencySubstitutionApplicator.SubstitutionResult substitutionResult = dependencySubstitutionApplicator.apply(dependencyState.getDependencyMetadata());
-//        if (substitutionResult.hasFailure()) {
-//            dependencyState.failure = new ModuleVersionResolveException(dependencyState.getOriginalSelector(), substitutionResult.getFailure());
-//            return dependencyState;
-//        }
+        if (substitutionResult.hasFailure()) {
+            dependencyState.failure = new ModuleVersionResolveException(dependencyState.getOriginalSelector(), substitutionResult.getFailure());
+            return dependencyState;
+        }
 
         DependencySubstitutionInternal details = substitutionResult.getResult();
         if (details != null && details.isUpdated()) {

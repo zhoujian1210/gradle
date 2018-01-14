@@ -26,8 +26,10 @@ import org.gradle.internal.component.model.DependencyMetadata
 import org.gradle.internal.resolve.ModuleVersionResolveException
 import org.gradle.internal.resolve.resolver.DependencyToComponentIdResolver
 import org.gradle.internal.resolve.result.BuildableComponentIdResolveResult
+import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 class DependencySubstitutionResolverSpec extends Specification {
     def selector = new DefaultModuleComponentSelector("group", "module", DefaultImmutableVersionConstraint.of("version"))
     def moduleIdentifierFactory = new DefaultImmutableModuleIdentifierFactory()

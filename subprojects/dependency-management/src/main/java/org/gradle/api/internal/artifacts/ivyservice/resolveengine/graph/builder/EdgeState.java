@@ -168,7 +168,7 @@ class EdgeState implements DependencyGraphEdge {
 
     @Override
     public ComponentSelector getRequested() {
-        return dependencyMetadata.getSelector();
+        return dependencyState.getOriginalSelector();
     }
 
     @Override

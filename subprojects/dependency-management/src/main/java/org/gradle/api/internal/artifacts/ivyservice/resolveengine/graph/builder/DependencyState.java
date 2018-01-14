@@ -20,6 +20,7 @@ import org.gradle.api.artifacts.component.ComponentSelector;
 import org.gradle.api.artifacts.result.ComponentSelectionReason;
 import org.gradle.api.internal.artifacts.ComponentSelectorConverter;
 import org.gradle.internal.component.model.DependencyMetadata;
+import org.gradle.internal.resolve.ModuleVersionResolveException;
 
 class DependencyState {
     private final DependencyMetadata dependencyMetadata;
@@ -28,6 +29,7 @@ class DependencyState {
     private final ComponentSelectionReason selectionReason;
 
     private ModuleIdentifier moduleIdentifier;
+    public ModuleVersionResolveException failure;
 
     DependencyState(DependencyMetadata dependencyMetadata, ComponentSelectorConverter componentSelectorConverter) {
         this(dependencyMetadata, componentSelectorConverter, dependencyMetadata.getSelector(), null);

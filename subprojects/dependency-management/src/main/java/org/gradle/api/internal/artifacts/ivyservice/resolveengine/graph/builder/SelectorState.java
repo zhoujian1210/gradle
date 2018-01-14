@@ -96,7 +96,12 @@ class SelectorState implements DependencyGraphSelector {
         }
 
         idResolveResult = new DefaultBuildableComponentIdResolveResult();
-        resolver.resolve(dependencyMetadata, idResolveResult);
+        if (dependencyState.failure != null) {
+            idResolveResult.failed(dependencyState.failure);
+        } else {
+            resolver.resolve(dependencyMetadata, idResolveResult);
+        }
+
         if (idResolveResult.getFailure() != null) {
             failure = idResolveResult.getFailure();
             return null;
