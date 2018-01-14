@@ -23,7 +23,6 @@ import org.gradle.api.artifacts.component.ComponentSelector;
 import org.gradle.api.internal.artifacts.ComponentSelectorConverter;
 import org.gradle.api.internal.artifacts.ResolvedConfigurationIdentifier;
 import org.gradle.api.internal.artifacts.dsl.ModuleReplacementsData;
-import org.gradle.api.internal.artifacts.ivyservice.dependencysubstitution.DependencySubstitutionApplicator;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.excludes.ModuleExclusions;
 import org.gradle.api.internal.attributes.AttributesSchemaInternal;
 import org.gradle.api.internal.attributes.ImmutableAttributesFactory;
@@ -133,11 +132,11 @@ class ResolveState {
         return selectors.values();
     }
 
-    public SelectorState getSelector(DependencyMetadata dependencyMetadata, ModuleIdentifier moduleIdentifier) {
-        ComponentSelector requested = dependencyMetadata.getSelector();
+    public SelectorState getSelector(DependencyState dependencyState, ModuleIdentifier moduleIdentifier) {
+        ComponentSelector requested = dependencyState.getOriginalSelector();
         SelectorState resolveState = selectors.get(requested);
         if (resolveState == null) {
-            resolveState = new SelectorState(idGenerator.generateId(), dependencyMetadata, idResolver, this, moduleIdentifier);
+            resolveState = new SelectorState(idGenerator.generateId(), dependencyState, idResolver, this, moduleIdentifier);
             selectors.put(requested, resolveState);
         }
         return resolveState;

@@ -15,9 +15,7 @@
  */
 package org.gradle.api.internal.artifacts.ivyservice.dependencysubstitution;
 
-import org.gradle.api.internal.artifacts.DependencySubstitutionInternal;
 import org.gradle.internal.component.model.DependencyMetadata;
-import org.gradle.internal.resolve.ModuleVersionResolveException;
 import org.gradle.internal.resolve.resolver.DependencyToComponentIdResolver;
 import org.gradle.internal.resolve.result.BuildableComponentIdResolveResult;
 
@@ -31,6 +29,7 @@ public class DependencySubstitutionResolver implements DependencyToComponentIdRe
     }
 
     public void resolve(DependencyMetadata dependency, BuildableComponentIdResolveResult result) {
+/*
         DependencySubstitutionApplicator.SubstitutionResult application = applicator.apply(dependency);
         if (application.hasFailure()) {
             result.failed(new ModuleVersionResolveException(dependency.getSelector(), application.getFailure()));
@@ -43,6 +42,7 @@ public class DependencySubstitutionResolver implements DependencyToComponentIdRe
             result.setSelectionReason(details.getSelectionReason());
             return;
         }
+*/
         resolver.resolve(dependency, result);
     }
 }

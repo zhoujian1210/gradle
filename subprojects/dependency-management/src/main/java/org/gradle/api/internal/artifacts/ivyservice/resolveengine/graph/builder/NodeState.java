@@ -173,6 +173,7 @@ class NodeState implements DependencyGraphNode {
                 if (isExcluded(resolutionFilter, dependencyState)) {
                     continue;
                 }
+                dependencyState = pendingDependenciesHandler.maybeSubstitute(dependencyState);
                 if (!pendingDepsVisitor.maybeAddAsPendingDependency(this, dependencyState)) {
                     EdgeState dependencyEdge = new EdgeState(this, dependencyState, resolutionFilter, resolveState);
                     outgoingEdges.add(dependencyEdge);

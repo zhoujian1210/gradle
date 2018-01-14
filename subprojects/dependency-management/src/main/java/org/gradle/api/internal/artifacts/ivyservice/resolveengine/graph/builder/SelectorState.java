@@ -34,6 +34,7 @@ import org.gradle.internal.resolve.result.DefaultBuildableComponentIdResolveResu
  */
 class SelectorState implements DependencyGraphSelector {
     private final Long id;
+    private final DependencyState dependencyState;
     private final DependencyMetadata dependencyMetadata;
     private final DependencyToComponentIdResolver resolver;
     private final ResolveState resolveState;
@@ -43,9 +44,10 @@ class SelectorState implements DependencyGraphSelector {
     private BuildableComponentIdResolveResult idResolveResult;
     private ResolvedVersionConstraint versionConstraint;
 
-    SelectorState(Long id, DependencyMetadata dependencyMetadata, DependencyToComponentIdResolver resolver, ResolveState resolveState, ModuleIdentifier targetModuleId) {
+    SelectorState(Long id, DependencyState dependencyState, DependencyToComponentIdResolver resolver, ResolveState resolveState, ModuleIdentifier targetModuleId) {
         this.id = id;
-        this.dependencyMetadata = dependencyMetadata;
+        this.dependencyState = dependencyState;
+        this.dependencyMetadata = dependencyState.getDependencyMetadata();
         this.resolver = resolver;
         this.resolveState = resolveState;
         this.targetModule = resolveState.getModule(targetModuleId);
@@ -63,7 +65,7 @@ class SelectorState implements DependencyGraphSelector {
 
     @Override
     public ComponentSelector getRequested() {
-        return dependencyMetadata.getSelector();
+        return dependencyState.getOriginalSelector();
     }
 
     ModuleVersionResolveException getFailure() {
@@ -102,6 +104,7 @@ class SelectorState implements DependencyGraphSelector {
 
         selected = resolveState.getRevision(idResolveResult.getModuleVersionId());
         selected.selectedBy(this);
+        selected.setSelectionReason(dependencyState.getSelectionReason());
         selected.setSelectionReason(idResolveResult.getSelectionReason());
         targetModule = selected.getModule();
         targetModule.addSelector(this);

@@ -44,6 +44,21 @@ public class DefaultPendingDependenciesHandler implements PendingDependenciesHan
         return new DefaultVisitor();
     }
 
+    @Override
+    public DependencyState maybeSubstitute(DependencyState dependencyState) {
+        DependencySubstitutionApplicator.SubstitutionResult substitutionResult = dependencySubstitutionApplicator.apply(dependencyState.getDependencyMetadata());
+//        if (substitutionResult.hasFailure()) {
+//            dependencyState.failure = new ModuleVersionResolveException(dependencyState.getOriginalSelector(), substitutionResult.getFailure());
+//            return dependencyState;
+//        }
+
+        DependencySubstitutionInternal details = substitutionResult.getResult();
+        if (details != null && details.isUpdated()) {
+            return dependencyState.withTarget(details.getTarget(), details.getSelectionReason());
+        }
+        return dependencyState;
+    }
+
     public class DefaultVisitor implements Visitor {
         private List<PendingDependencies> noLongerPending;
 
@@ -78,11 +93,13 @@ public class DefaultPendingDependenciesHandler implements PendingDependenciesHan
         }
 
         private ModuleIdentifier lookupModuleIdentifier(DependencyState dependencyState) {
+/*
             DependencySubstitutionApplicator.SubstitutionResult substitutionResult = dependencySubstitutionApplicator.apply(dependencyState.getDependencyMetadata());
             DependencySubstitutionInternal details = substitutionResult.getResult();
             if (details != null && details.isUpdated()) {
                 return componentSelectorConverter.getModule(details.getTarget());
             }
+*/
             return dependencyState.getModuleIdentifier();
         }
 
